@@ -185,63 +185,71 @@ function getUsers(req,res){
     });
 }
 
+
 async function followUserIds(user_id){
-
-
-
-    var following = await Follow.find({"user": user_id}).select({'_id': 0, '__uv': 0, 'user': 0}).exec().then((follows)=>{
-    
+    var following = await Follow.find({"user": user_id}).select({'_id': 0, '__uv': 0, 'user': 0}).exec().then((follows)=>{    
     var follows_clean=[];
     
     follows.forEach((follow)=>{
-    
     follows_clean.push(follow.followed);
-    
     });
     
     console.log("follows_clean", follows_clean);
-    
     return follows_clean;
-    
     }).catch((err)=>{
-    
     return handleerror(err);
-    
     });
-    
-    
     
     var followed = await Follow.find({"followed": user_id}).select({'_id': 0, '__uv': 0, 'followed': 0}).exec().then((follows)=>{
-    
     var follows_clean=[];
-    
+
     follows.forEach((follow)=>{
-    
     follows_clean.push(follow.user);
-    
     });
-    
+
     return follows_clean;
     
     }).catch((err)=>{
-    
-    return handleerror(err);
-    
+        return handleerror(err);
     });
-    
-    
-    
-    console.log(following);
-    
-    return {
-    
-    following: following,
-    
-    followed: followed
-    
+        return {    
+        following: following,
+        followed: followed
+        }
+}
+
+//Contador seguidores/seguidos
+function getCounters(req,res){
+    var user_id = req.user.sub;
+
+    if(req.params.id){
+        user_id = req.params.id;
     }
-    
-    }
+        
+        getCountFollow(user_id).then((value) => {
+            return res.status(200).send({value});
+        });
+}
+
+async function getCountFollow(user_id) {
+    var following = await Follow.countDocuments({ user: user_id })
+        .exec()
+        .then((count) => {
+            console.log(count);
+            return count;
+        })
+        .catch((err) => { return handleError(err); });
+ 
+    var followed = await Follow.countDocuments({ followed: user_id })
+        .exec()
+        .then((count) => {
+            return count;
+        })
+        .catch((err) => { return handleError(err); });
+ 
+    return { following: following, followed: followed }
+ 
+}
 
 //Editar datos usuario
 function updateUser(req,res){
@@ -344,7 +352,9 @@ module.exports = {
     loginUser,
     getUser,
     getUsers,
+    getCounters,
     updateUser,
     uploadImage,
-    getImageFile
+    getImageFile,
+    
 }
