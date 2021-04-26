@@ -11,7 +11,7 @@ const { restart } = require('nodemon');
 var User = require('../models/user');
 var jwt = require('../services/jwt');
 const Follow = require('../models/follow');
-
+var Publication = require('../models/publication');
 
 //Métodos de pruebas
 function home (req,res){
@@ -232,7 +232,7 @@ function getCounters(req,res){
 }
 
 async function getCountFollow(user_id) {
-    var following = await Follow.countDocuments({ user: user_id })
+    var following = await Follow.countDocuments({ "user": user_id })
         .exec()
         .then((count) => {
             console.log(count);
@@ -240,14 +240,28 @@ async function getCountFollow(user_id) {
         })
         .catch((err) => { return handleError(err); });
  
-    var followed = await Follow.countDocuments({ followed: user_id })
+    var followed = await Follow.countDocuments({ "followed": user_id })
         .exec()
         .then((count) => {
             return count;
         })
         .catch((err) => { return handleError(err); });
+
+    
+        var publication = await Publication.countDocuments({ "user": user_id })
+        .exec()
+        .then((count) => {
+            return count;
+        })
+        .catch((err) => { return handleError(err); });
+
+
  
-    return { following: following, followed: followed }
+    return { 
+        following: following, 
+        followed: followed,
+        publications: publication
+    }
  
 }
 
@@ -298,7 +312,7 @@ function uploadImage(req,res){
            return removeFilesOfUploads(res, file_path,'No tienes permisos para actualizar los datos del usuario');
         }
 
-        if(file_ext == 'png' || file_ext == 'jpg' || file_ext == 'jpeg' || file_ext == 'git'){
+        if(file_ext == 'png' || file_ext == 'jpg' || file_ext == 'jpeg' || file_ext == 'gif'){
             //Actualizar documento usuario logueado
             User.findByIdAndUpdate(userId, {image: file_name}, {new: true}, (err, userUpdated)=>{
                 if(err) return res.status(500).send({message: 'Error en la petición'})
