@@ -12,6 +12,7 @@ var User = require('../models/user');
 var jwt = require('../services/jwt');
 const Follow = require('../models/follow');
 var Publication = require('../models/publication');
+const user = require('../models/user');
 
 //Métodos de pruebas
 function home (req,res){
@@ -266,24 +267,59 @@ async function getCountFollow(user_id) {
 }
 
 //Editar datos usuario
-function updateUser(req,res){
-    var userId = req.params.id;
-    var update = req.body;
-
-    //Borrar propiedad password
+function updateUser(request, response) {
+    let userId = request.params.id;
+    let update = request.body;
+    
+    // Quitar propiedad password
     delete update.password;
 
-    if(userId != req.user.sub){
-        return res.status(500).send({message: 'No tienes permisos para actualizar los datos del usuario'});
+    // Si el id que llega por la url es diferente al id del usuario identificado
+    if (userId != request.user.sub) {
+        return response.status(500).send({ message: 'No tienes permiso para actualizar los datos' });
+
     }
 
-    User.findByIdAndUpdate(userId, update, {new:true}, (err, userUpdated)=>{
-        if(err) return res.status(500).send({message: 'Error en la petición'})
+    //Regex para evitar duplicados may/min
+    const findEmail = new RegExp(update.email,"i");
+    const findNick = new RegExp(update.nick,"i");
 
-        if(!userUpdated) return res.status(404).send({message: 'No se ha podido actualizar el usuario'});
 
-        return res.status(200).send({user: userUpdated});
+    // Evitar actualizar datos duplicados
+    User.find({
+        $or: [
+            { email: findEmail },
+            { nick: findNick }
+        ]
+        
+    }).exec((error, users) => {
+        var user_isset = false;
+        
+        users.forEach((user)=>{
+           
+            console.log("foreach", user._id);
+            console.log(user._id,"+", userId)
+            
+            if (user && user._id != userId){
+                user_isset = true;
+            }  
+        });
+
+        if(user_isset) return response.status(404).send({ message: 'Email o password no disponibles' });
+        
+
+        // { new: true } devuelve el objeto actualizado
+
+        User.findByIdAndUpdate(userId, update, { new: true }, (error, userUpdated) => {
+
+            if (error) return response.status(500).send({ message: 'No se ha podido procesar la peticion para actualizar usuario' });
+            if (!userUpdated) return response.status(404).send({ message: 'No se ha podido actualizar el usuario' });
+            return response.status(200).send({ user: userUpdated });
+
+        });
+
     });
+
 
 
 }
