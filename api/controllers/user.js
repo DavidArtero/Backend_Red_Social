@@ -249,7 +249,7 @@ async function getCountFollow(user_id) {
         .catch((err) => { return handleError(err); });
 
     
-        var publication = await Publication.countDocuments({ "user": user_id })
+        var publications = await Publication.countDocuments({ "user": user_id })
         .exec()
         .then((count) => {
             return count;
@@ -261,7 +261,7 @@ async function getCountFollow(user_id) {
     return { 
         following: following, 
         followed: followed,
-        publications: publication
+        publications: publications
     }
  
 }
