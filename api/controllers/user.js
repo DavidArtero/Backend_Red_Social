@@ -141,7 +141,7 @@ async function followThisUser(identity_user_id, user_id) {
     });
  
     var followed = await Follow.findOne({ "user": user_id, "followed": identity_user_id }).exec().then((follow) => {
-        console.log(follow);
+        //console.log(follow);
         return follow;
     }).catch((err) => {
         return handleError(err);
@@ -195,7 +195,7 @@ async function followUserIds(user_id){
     follows_clean.push(follow.followed);
     });
     
-    console.log("follows_clean", follows_clean);
+    //console.log("follows_clean", follows_clean);
     return follows_clean;
     }).catch((err)=>{
     return handleerror(err);
@@ -236,7 +236,7 @@ async function getCountFollow(user_id) {
     var following = await Follow.countDocuments({ "user": user_id })
         .exec()
         .then((count) => {
-            console.log(count);
+            //console.log(count);
             return count;
         })
         .catch((err) => { return handleError(err); });
@@ -297,8 +297,8 @@ function updateUser(request, response) {
         
         users.forEach((user)=>{
            
-            console.log("foreach", user._id);
-            console.log(user._id,"+", userId)
+            //console.log("foreach", user._id);
+            //console.log(user._id,"+", userId)
             
             if (user && user._id != userId){
                 user_isset = true;

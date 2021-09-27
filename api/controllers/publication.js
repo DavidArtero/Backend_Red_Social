@@ -42,6 +42,7 @@ function getPublications(req, res){
     //Si recibimos la página por los parámetros
     if(req.params.page){
         page = req.params.page;
+        
     }
 
     var itemsPerPage = 4;
@@ -54,8 +55,11 @@ function getPublications(req, res){
         follows.forEach((follow) => {
             follows_clean.push(follow.followed);
         });
+
+        follows_clean.push(req.user.sub);
         //console.log("array gente que seguimos->",follows_clean);
-        Publication.find({user: {"$in": follows_clean}}).sort('-created_at').populate('user').paginate(page, itemsPerPage, (err, publications, total) =>{
+        Publication.find({user: {"$in": follows_clean}}).sort('-created_at').populate('user').paginate(page, itemsPerPage, 
+            (err, publications, total) =>{
             if(err) return res.status(500).send({message: 'Error al devolver publicaciones'});
 
             if(!publications) return res.status(404).send({message: 'No hay publicaciones'});
@@ -64,6 +68,7 @@ function getPublications(req, res){
                 total_items: total,
                 pages: Math.ceil(total/itemsPerPage),
                 page: page,
+                items_per_page: itemsPerPage,
                 publications
             })
 
@@ -100,7 +105,7 @@ function getPublication(req, res){
 function deletePublication(req, res){
     var publicationId = req.params.id;
     const query = { "user": req.user.sub, "_id": publicationId };
-    console.log(query)
+    //console.log(query)
 
     const options = {
         "sort": { "quantity": -1 }
@@ -108,7 +113,7 @@ function deletePublication(req, res){
     Publication.findOneAndDelete(query, options)
     .then(deletedDocument => {
       if(deletedDocument) {
-        console.log(`Documento borrado correctamente: ${deletedDocument}.`)
+        //console.log(`Documento borrado correctamente: ${deletedDocument}.`)
       } else {
         return res.status(200).send({message:'Ningún documento coincide'});
       }

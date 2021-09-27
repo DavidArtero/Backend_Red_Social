@@ -44,7 +44,7 @@ function getFollowingUsers(req,res){
    
     var page = 1;
 
-    console.log(req.params.page)
+    //console.log(req.params.page)
 
     if(req.params.id && req.params.page){
         userId = req.params.id;  
@@ -96,7 +96,7 @@ function getFollowedUsers(req, res){
  
         if(!follows) return res.status(404).send({message: 'No te sigue ningun usuario'});
  
-console.log(follows);
+        //console.log(follows);
       
             return res.status(200).send({
                 total: total,
