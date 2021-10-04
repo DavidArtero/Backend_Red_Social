@@ -80,7 +80,7 @@ function getPublications(req, res){
 
 
 function getMyOwnPublications(req, res){
-    console.log("hello getMyOwnPublications")
+    
     var page = 1;
     //Si recibimos la página por los parámetros
     if(req.params.page){
