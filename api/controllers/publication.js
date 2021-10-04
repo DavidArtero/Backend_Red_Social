@@ -78,6 +78,45 @@ function getPublications(req, res){
 
 }
 
+
+function getMyOwnPublications(req, res){
+    console.log("hello getMyOwnPublications")
+    var page = 1;
+    //Si recibimos la página por los parámetros
+    if(req.params.page){
+        page = req.params.page;
+        
+    }
+
+    var itemsPerPage = 4;
+    let follows_clean = [];
+    //find de usuarios que seguimos
+    Follow.find({user: req.user.sub}).populate('followed').exec((err) => {
+        if(err) return res.status(500).send({message: 'Error al devolver el seguimiento'});
+        //Array de ids que seguimos
+
+        follows_clean.push(req.user.sub);
+        //console.log("array gente que seguimos->",follows_clean);
+        Publication.find({user: req.user.sub}).sort('-created_at').populate('user').paginate(page, itemsPerPage, 
+            (err, publications, total) =>{
+            if(err) return res.status(500).send({message: 'Error al devolver publicaciones'});
+
+            if(!publications) return res.status(404).send({message: 'No hay publicaciones'});
+
+            return res.status(200).send({
+                total_items: total,
+                pages: Math.ceil(total/itemsPerPage),
+                page: page,
+                items_per_page: itemsPerPage,
+                publications
+            })
+
+        });
+
+    });
+
+}
+
 function getPublication(req, res){
     var publicationId = req.params.id;
 
@@ -90,17 +129,6 @@ function getPublication(req, res){
     });
 }
 
-/*function deletePublication(req, res){
-    var publicatioId = req.params.id;
- 
-    Publication.deleteOne({'user': req.user.sub, '_id': publicatioId}).then(err => {
-        if(err) return res.status(500).send({message: 'Error al intentar eliminar la publicación'});
- 
-        //if(!publicationRemoved) return res.status(404).send({message: 'La publicación no existe o ya ha sido eliminada'});
- 
-        return res.status(200).send({message: 'La publicación ha sido eliminada'});
-    });
-}*/
 
 function deletePublication(req, res){
     var publicationId = req.params.id;
@@ -202,6 +230,7 @@ module.exports = {
     probando,
     savePublication,
     getPublications,
+    getMyOwnPublications,
     getPublication,
     deletePublication,
     uploadImage,

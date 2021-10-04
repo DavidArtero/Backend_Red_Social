@@ -13,6 +13,7 @@ var md_upload = multipart({uploadDir: './uploads/publications'});
 api.get('/probando-pub', md_auth.ensureAuth, PublicationController.probando);
 api.post('/publication', md_auth.ensureAuth, PublicationController.savePublication);
 api.get('/publications/:page?', md_auth.ensureAuth, PublicationController.getPublications);
+api.get('/my-own-publications/:page?', md_auth.ensureAuth, PublicationController.getMyOwnPublications);
 api.get('/publication/:id', md_auth.ensureAuth, PublicationController.getPublication);
 api.delete('/publication/:id', md_auth.ensureAuth, PublicationController.deletePublication);
 api.post('/upload-image-pub/:id',[md_auth.ensureAuth, md_upload], PublicationController.uploadImage);
