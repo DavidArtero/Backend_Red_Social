@@ -41,6 +41,7 @@ function saveUser(req,res){
         user.email = params.email;
         user.role = 'ROLE_USER';
         user.image = null;
+        user.backgroundImage = null;
 
         //Evitar duplicados
         User.find({ $or: [
@@ -369,6 +370,51 @@ function uploadImage(req,res){
     }
 }
 
+//Subir archivo de imagen/avar usuario
+function uploadBackgroundImage(req,res){
+    var userId = req.params.id;
+
+
+    if(req.files){
+        var file_path = req.files.image.path;
+        var file_split = file_path.split('\\');
+        //console.log(file_split);
+
+        var file_name = file_split[2];
+        //console.log('file_name->', file_name)
+
+        var ext_split = file_name.split('\.');
+        //console.log("extension->", ext_split)
+
+        //Guardar si es jpg, pgn o la extensión
+        var file_ext = ext_split[1];
+        //console.log("extension->", file_ext);
+
+        if(userId != req.user.sub){
+           return removeFilesOfUploads(res, file_path,'No tienes permisos para actualizar los datos del usuario');
+        }
+
+        if(file_ext == 'png' || file_ext == 'jpg' || file_ext == 'jpeg' || file_ext == 'gif'){
+            //Actualizar documento usuario logueado
+            User.findByIdAndUpdate(userId, {backgroundImage: file_name}, {new: true}, (err, userUpdated)=>{
+                if(err) return res.status(500).send({message: 'Error en la petición'})
+
+                if(!userUpdated) return res.status(404).send({message: 'No se ha podido actualizar el usuario'});
+        
+                return res.status(200).send({user: userUpdated});
+            });
+            
+        }else{
+            //Borrar archivos guardados por multiparty
+           return removeFilesOfUploads(res, file_path,'Extensión no válida');
+        }
+
+
+    }else{
+        return res.status(200).send({message: 'No se han subido imágenes'});
+    }
+}
+
 //Borrar archivos de subidas
 function removeFilesOfUploads(res, file_path,message){
     fs.unlink(file_path,(err)=>{
@@ -405,6 +451,7 @@ module.exports = {
     getCounters,
     updateUser,
     uploadImage,
-    getImageFile,
+    uploadBackgroundImage,
+    getImageFile
     
 }

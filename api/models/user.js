@@ -11,7 +11,8 @@ var UserSchema = Schema({
     email: String,
     password: String,
     role: String,
-    image: String
+    image: String,
+    backgroundImage: String
 });
 
 
