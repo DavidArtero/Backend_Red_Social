@@ -83,6 +83,8 @@ function getEmmitMessages(req, res){
     });
 }
 
+
+
 function getUnviewedMessages(req, res){
     var userId = req.user.sub;
 
@@ -107,6 +109,8 @@ function setViewedMessages(req, res){
 
     })
 }
+
+
 
 module.exports = {
     probando,

@@ -49,7 +49,7 @@ function getFollowingUsers(req,res){
     if(req.params.id && req.params.page){
         userId = req.params.id;  
         page = req.params.page;     
-        console.log("hello params.id && page")
+        
     }
 
     else if(req.params.page){

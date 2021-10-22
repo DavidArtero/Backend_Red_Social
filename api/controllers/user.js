@@ -83,11 +83,14 @@ function loginUser(req,res){
     var email = params.email;
     var password = params.password;
 
+    console.log(params)
     User.findOne({email:email}, (err,user)=>{
+        
         if(err) return res.status(500).send({meesage: 'Error en la petición'});
 
-        if(user){
+        if(user){               
             bcrypt.compare(password, user.password, (err, check) =>{
+                
                 if(check){
                     
                     if(params.gettoken){    
@@ -271,11 +274,13 @@ async function getCountFollow(user_id) {
 function updateUser(request, response) {
     let userId = request.params.id;
     let update = request.body;
+    // console.log("body->",request.body)
     
     // Quitar propiedad password
     delete update.password;
 
     // Si el id que llega por la url es diferente al id del usuario identificado
+    
     if (userId != request.user.sub) {
         return response.status(500).send({ message: 'No tienes permiso para actualizar los datos' });
 
@@ -331,6 +336,8 @@ function uploadImage(req,res){
 
 
     if(req.files){
+        // console.log(req.files)
+
         var file_path = req.files.image.path;
         var file_split = file_path.split('\\');
         //console.log(file_split);
@@ -377,7 +384,13 @@ function uploadBackgroundImage(req,res){
 
     if(req.files){
         var file_path = req.files.image.path;
-        var file_split = file_path.split('\\');
+        try{
+            var file_split = file_path.split('\\');
+        }
+        catch(e){
+            console.log(error)
+        }
+        
         //console.log(file_split);
 
         var file_name = file_split[2];
@@ -417,6 +430,7 @@ function uploadBackgroundImage(req,res){
 
 //Borrar archivos de subidas
 function removeFilesOfUploads(res, file_path,message){
+    console.log(res)
     fs.unlink(file_path,(err)=>{
         return res.status(200).send({message: message});
     });
@@ -427,6 +441,7 @@ function getImageFile(req, res){
     var image_file = req.params.imageFile;
 
     var path_file = './uploads/users/' + image_file;
+   
 
     fs.exists(path_file, (exists) => {
 		if(exists){
@@ -437,6 +452,42 @@ function getImageFile(req, res){
 		}
 	});
 
+}
+
+function removeImage(req,res){
+    console.log("inside remove image!!!!!")
+    
+    var user = req.user;
+    var image_file = req.params.imageFile;
+
+    var path_file = './uploads/users/' + image_file;
+    
+//     console.log("image->",req.user)
+//    console.log("image_file", image_file)
+
+    fs.exists(path_file, (exists) => {
+        if(user.backgroundImage && exists){
+            console.log(user.backgroundImage)
+            //es su foto de background
+            if(user.backgroundImage == image_file){
+                // console.log("es su foto")
+                fs.unlink(path_file,(err)=>{
+                    console.log("imagen borrada")
+                    return res.status(200).send("imagen borrada correctamente");
+                   
+                });
+            }
+        }else{
+            res.status(200).send({message: "No existe la imagen..."})
+            	//console.log(exists);
+            }
+
+		// if(exists){
+	
+
+		// }
+	});
+    
 }
 
 
@@ -452,6 +503,7 @@ module.exports = {
     updateUser,
     uploadImage,
     uploadBackgroundImage,
-    getImageFile
+    getImageFile,
+    removeImage
     
 }
